@@ -1,5 +1,4 @@
-from django.forms import forms
+from django import forms
 
-
-class	NoteForms(forms.Form):
-	rawtext = forms.CharField(widget=forms.Textarea, label="Entrez vos notes brutes ici")
+class	NoteForm(forms.Form):
+	raw_text = forms.CharField(widget=forms.Textarea, label="Entrez vos notes brutes ici \n\n")
