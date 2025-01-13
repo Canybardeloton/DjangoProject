@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Upload Notes</title>
+	<title>Upload Notes</title>
 </head>
 <body>
-    <h1>Déposez vos notes brutes</h1>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Traiter</button>
-    </form>
+	<p>Cette page vous permet de traiter vos ecrits en un rien de temps</p>
+	<h1>Déposez vos notes brutes ici</h1>
+	<form method="post">
+		{% csrf_token %}
+		{{ form.as_p }}
+		<button type="submit">Traiter</button>
+	</form>
+	<h1>Importer votre fichier ici</h1>
 </body>
 </html>

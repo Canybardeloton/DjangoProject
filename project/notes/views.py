@@ -3,11 +3,11 @@ from .models import Note
 from .forms import NoteForm
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM # Librairie dui modele IA
 
-def upload_note(request):
+def upload_rawtext(request):
 	if request.method == "POST": # Le programme est en mode envoi
 		form = NoteForm(request.POST) # L'utilisateur envoie une demande au serveur avec texte brut
 		if form.is_valid(): # Verifie si l'input de l'utilisateur est conforme
-			raw_text = Note.raw_text # Associe à une variable raw_text l'attribut de la classe
+			raw_text = form.cleaned_data['raw_text'] # Associe à une variable raw_text le réponse de l'utilisateur du formulaire
 
 			note = Note.objects.create(raw_text=raw_text) # Créé une nouvelle ligne dans la base de données
 
@@ -30,6 +30,7 @@ def upload_note(request):
 			# Récupération de l'output du modèle
 			structured_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
 			note.processed = True # Changement de statut de la classe comme étant procéssé.
+			note.structured_text = structured_text  # Stocker le texte structuré dans l'objet note
 			note.save()
 			return render(request, 'result.html', {'note': note}) # Appliquer le templates pour la page de resultat avec l'output'
 	else:
