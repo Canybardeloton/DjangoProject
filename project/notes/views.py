@@ -4,10 +4,13 @@ from .forms import NoteForm
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM # Librairie dui modele IA
 
 def upload_rawtext(request):
-	if request.method == "POST": # Le programme est en mode envoi
-		form = NoteForm(request.POST) # L'utilisateur envoie une demande au serveur avec texte brut
+	if request.method == "POST": # Le programme est en mode envoi (a l'inverse de GET qui correspond à la reception par le serveur de la réponse de l'utilisateur)
+		form = NoteForm(request.POST, request.FILES) # L'utilisateur envoie une demande au serveur avec texte brut
 		if form.is_valid(): # Verifie si l'input de l'utilisateur est conforme
 			raw_text = form.cleaned_data['raw_text'] # Associe à une variable raw_text le réponse de l'utilisateur du formulaire
+			user_file = form.cleaned_data['user_file'] # Associe à une variable user_file le fichier envoyé par l'utilisateur
+			if user_file: # Si l'utilisateur a envoyé un fichier
+				raw_text = user_file.read().decode('utf-8')
 
 			note = Note.objects.create(raw_text=raw_text) # Créé une nouvelle ligne dans la base de données
 
@@ -18,7 +21,6 @@ def upload_rawtext(request):
 			input_ids = tokenizer.encode(
 				f"Organise ces notes de manière structurée : {raw_text}",
 				return_tensors="pt",  # Tenseur PyTorch
-				max_length=512,       # Limiter la longueur d'entrée
 				truncation=True       # Tronquer le texte s'il est trop long
 			)
 			outputs = model.generate(
