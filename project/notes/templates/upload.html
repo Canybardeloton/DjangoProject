@@ -1,15 +1,35 @@
 <!DOCTYPE html>
 <html>
+	<header>
+		<h1>MODOP pour l'utilisation de l'application</h1>
+	</header>
+<nav>
+</nav>
 <head>
 	<title>Upload Notes</title>
 </head>
 <body>
 	<p>Cette page vous permet de traiter vos ecrits en un rien de temps</p>
+	<ul>
+		<li>Vous pouvez copier-coller vos notes brutes dans le champ prévu à cet effet, puis appuyer sur le bouton <strong>Traiter</strong></li>
+		<li>Vous pouvez également importer votre fichier de prise de note. Une fois votre fichier selectionné, appuyer sur le bouton <strong>Importer</strong></li>
+	</ul>
+	<p>L'application se chargera de structurer vos notes pour vous selon un modèle pré-établit</p>
+	<p>Les notes structurées seront affichées sur la page suivante</p>
 	<h1>Déposez vos notes brutes ici</h1>
+	<h2>Copier-coller vos notes brutes</h2>
 	<form method="post">
 		{% csrf_token %}
-		{{ form.as_p }}
+		<textarea name="raw_text" rows="10" cols="50" placeholder="Collez vos notes brutes ici..."></textarea>
+		{{ form.text_field }}
 		<button type="submit">Traiter</button>
+	</form>
+
+	<h2>Importer votre fichier de prise de note</h2>
+	<form method="post" enctype="multipart/form-data">
+		{% csrf_token %}
+		{{ form.file_field }}
+		<button type="submit">Importer</button>
 	</form>
 </body>
 </html>
