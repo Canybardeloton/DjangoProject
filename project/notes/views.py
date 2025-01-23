@@ -1,42 +1,80 @@
 from django.shortcuts import render
 from .models import Note
 from .forms import NoteForm
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM # Librairie dui modele IA
+import json
+import requests
+
+def parse_raw_text(raw_text):
+	lines = raw_text.split('\n')
+	raw_text_dict = {}
+	for line in lines:
+		if ': ' in line:
+			key, value = line.split(': ', 1)
+			raw_text_dict[key.strip().lower()] = value.strip()
+	return raw_text_dict
+
+def generate_prompt(raw_text):
+	raw_text_dict = parse_raw_text(raw_text)
+	return f"""
+	Rédige un compte rendu neuropsychologique complet à partir des informations suivantes :
+
+	1. Identité :
+	   - Nom : {raw_text_dict['nom']}
+	   - Âge : {raw_text_dict['age']}
+	   - Profession : {raw_text_dict['profession']}
+
+	2. Contexte de la consultation :
+	   - Motif : {raw_text_dict['motif']}
+
+	3. Antécédents médicaux :
+	   {raw_text_dict['antecedents']}
+
+	4. Observations cliniques :
+	   {raw_text_dict['observations']}
+
+	5. Résultats des tests :
+	   {raw_text_dict['tests']}
+
+	6. Hypothèses et recommandations :
+	   - Hypothèses : {raw_text_dict['hypotheses']}
+	   - Recommandations : {raw_text_dict['recommandations']}
+
+	Compte rendu :
+	"""
 
 def upload_rawtext(request):
-	if request.method == "POST": # Le programme est en mode envoi (a l'inverse de GET qui correspond à la reception par le serveur de la réponse de l'utilisateur)
-		form = NoteForm(request.POST, request.FILES) # L'utilisateur envoie une demande au serveur avec texte brut
-		if form.is_valid(): # Verifie si l'input de l'utilisateur est conforme
-			raw_text = form.cleaned_data['raw_text'] # Associe à une variable raw_text le réponse de l'utilisateur du formulaire
-			user_file = form.cleaned_data['user_file'] # Associe à une variable user_file le fichier envoyé par l'utilisateur
-			if user_file: # Si l'utilisateur a envoyé un fichier
+	if request.method == "POST":
+		form = NoteForm(request.POST, request.FILES)
+		if form.is_valid():
+			raw_text = form.cleaned_data['raw_text']
+			user_file = form.cleaned_data['user_file']
+			if user_file:
 				raw_text = user_file.read().decode('utf-8')
 
-			note = Note.objects.create(raw_text=raw_text) # Créé une nouvelle ligne dans la base de données
+			note = Note.objects.create(raw_text=raw_text)
 
-			# Utiliser un modèle de résumé pour générer du texte structuré
-			model_name = "Falconsai/text_summarization"
-			tokenizer = AutoTokenizer.from_pretrained(model_name)
-			model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
-			input_ids = tokenizer.encode(
-				f"Organise ces notes de manière structurée : {raw_text}",
-				return_tensors="pt",  # Tenseur PyTorch
-				truncation=True       # Tronquer le texte s'il est trop long
-			)
-			outputs = model.generate(
-				input_ids,
-				max_length=1000,  # Limite de longueur pour le texte généré
-				num_beams=4,      # Utilisation de beams pour une génération optimisée
-				early_stopping=True
-			)
-			# Récupération de l'output du modèle
-			structured_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
-			note.processed = True # Changement de statut de la classe comme étant procéssé.
-			note.structured_text = structured_text  # Stocker le texte structuré dans l'objet note
+			prompt = generate_prompt(raw_text)
+
+			# Utiliser l'API d'Ollama pour générer du texte structuré
+			api_url = "https://api.ollama.com/deepseek-r1"
+			headers = {
+				"Authorization": "Bearer YOUR_API_KEY",
+				"Content-Type": "application/json"
+			}
+			prompt = generate_prompt(raw_text)
+			response = requests.post(api_url, headers=headers, json=prompt)
+			result = response.json()
+			structured_text = result['generated_text']
+
+			raw_text_dict = parse_raw_text(raw_text)
+			note.raw_text_dict = json.dumps(raw_text_dict)  # Convert to JSON string
+			note.processed = True
+			note.structured_text = structured_text
 			note.save()
-			return render(request, 'result.html', {'note': note}) # Appliquer le templates pour la page de resultat avec l'output'
+			return render(request, 'result.html', {'note': note, 'raw_text_dict': raw_text_dict})
 	else:
-		form = NoteForm() # Génère les champs définit dans le Form
-	return render(request, 'upload.html', {'form': form}) # Appliquer le templates de la page d'upload
+		form = NoteForm()
+	return render(request, 'upload.html', {'form': form})
 
-# Create your views here.
+def result(request):
+	return render(request, 'result.html')

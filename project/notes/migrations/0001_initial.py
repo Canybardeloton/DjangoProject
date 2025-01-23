@@ -19,6 +19,7 @@ class Migration(migrations.Migration):
                 ('raw_text', models.TextField()),
                 ('structured_notes', models.TextField(blank=True, null=True)),
                 ('processed', models.BooleanField(default=False)),
+                ('raw_text_dict', models.TextField(null=True, blank=True)),
             ],
         ),
     ]
