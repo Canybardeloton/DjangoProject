@@ -18,13 +18,28 @@
 			box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 			text-align: center;
 		}
+		.container button {
+			width: 95%;
+			padding: 10px;
+			background-color: #4CAF50;
+			color: white;
+			border: none;
+			border-radius: 5px;
+			cursor: pointer;
+			display: block;
+			margin: 0 auto;
+		}
+		.login-container button:hover {
+			background-color: #45a049;
+		}
 	</style>
 </head>
 <body>
 	<div class="container">
 		<h1>Bienvenue sur la page d'accueil</h1>
 		<p>Ceci est la page d'accueil de votre application Django.</p>
-		<a href="{% url 'login' %}" class="link">Se connecter</a>
+		<a href="{% url 'login' %}" class="link"><button>Se connecter</button></a><br>
+		<a href="{% url 'signup' %}" class="link"><button>S'enregistrer</button></a>
 	</div>
 </body>
 </html>

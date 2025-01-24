@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
-from .models import Documents, UserInfo
+from .models import Documents
+from signup.models import UserInfo
 from .forms import UserFileForm
 from django.contrib.auth.decorators import login_required, user_passes_test
 

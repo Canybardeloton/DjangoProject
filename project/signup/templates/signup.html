@@ -1,0 +1,32 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Signup</title>
+	<link rel="stylesheet" type="text/css" href="{% static 'signup.css' %}">
+</head>
+<body>
+	<div class="signup-container">
+		<h1>Créer un compte</h1>
+		<form method="post">
+			{% csrf_token %}
+			<label for="Prénom">Prénom</label>
+			<input type="text" id="first_name" name="first_name" required>
+
+			<label for="Nom">Nom</label>
+			<input type="text" id="last_name" name="last_name" required>
+
+			<label for="Email">Email</label>
+			<input type="text" id="Email" name="Email" required>
+
+			<label for="Cabinet">Cabinet</label>
+			<input type="text" id="Cabinet" name="Cabinet" required>
+
+			<label for="password">Password</label>
+			<input type="password" id="password" name="password" required>
+
+			<button type="submit">Enregistrer</button>
+		</form>
+	</div>
+</body>
+</html>

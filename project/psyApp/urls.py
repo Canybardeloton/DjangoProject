@@ -21,9 +21,10 @@ from upload import views as upload_views
 from . import views
 
 urlpatterns = [
-    path('notes/', include('notes.urls')),
-    path('login/', include('login.urls')),
-    path('upload/', include('upload.urls')),
-    path('admin/', admin.site.urls),
-    path('', views.home_view, name='home'),
+	path('notes/', include('notes.urls')),
+	path('login/', include('login.urls')),
+	path('upload/', include('upload.urls')),
+	path('signup/', include('signup.urls')),
+	path('admin/', admin.site.urls),
+	path('', views.home_view, name='home'),
 ]

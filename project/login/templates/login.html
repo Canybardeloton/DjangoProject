@@ -10,6 +10,13 @@
 		<h1>Login</h1>
 		<form method="post">
 			{% csrf_token %}
+			{% if messages %}
+				<ul>
+					{% for message in messages %}
+						<li>{{ message }}</li>
+					{% endfor %}
+				</ul>
+			{% endif %}
 			<label for="username">Username</label>
 			<input type="text" id="username" name="username" required>
 

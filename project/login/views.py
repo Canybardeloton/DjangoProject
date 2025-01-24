@@ -10,7 +10,5 @@ def login_view(request):
 		user = authenticate(request, username=username, password=password)
 		if user is not None:
 			login(request, user)
-			return redirect('upload', user_id=user.id)
-		else:
-			return redirect('login')
+			return redirect('upload', kwargs={'user_id': user.id})
 	return render(request, 'login.html')
