@@ -9,9 +9,13 @@ def FillUserForm(request):
 	if request.method == "POST":
 		form = UserInfoForm(request.POST)
 		if form.is_valid():
-			data = form.cleaned_data['user']
-			if data:
-				user = UserInfo.objects.create(user=data)
+			first_name = form.cleaned_data.get('first_name')
+			last_name = form.cleaned_data.get('last_name')
+			email = form.cleaned_data.get('email')
+			cabinet = form.cleaned_data.get('cabinet')
+			password = form.cleaned_data.get('password')
+			if first_name and last_name and email and cabinet and password:
+				user = UserInfo.objects.create(first_name=first_name, last_name=last_name, email=email, cabinet=cabinet, password=password)
 				user.save()
 		return redirect('home')
 	else:

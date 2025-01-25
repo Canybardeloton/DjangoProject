@@ -28,6 +28,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+LOGIN_URL = 'login'  # URL de la page de connexion
+LOGIN_REDIRECT_URL = 'upload'  # URL de redirection après connexion réussie
 
 # Application definition
 

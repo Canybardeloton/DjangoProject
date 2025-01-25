@@ -9,7 +9,7 @@ def is_admin(user):
 	return user.is_superuser
 
 @login_required
-@user_passes_test(is_admin)
+#@user_passes_test(is_admin)
 def import_files(request, user_id):
 	user = get_object_or_404(UserInfo, id=user_id)
 	if request.method == "POST":
