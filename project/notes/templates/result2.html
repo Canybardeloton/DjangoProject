@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Structured Notes</title>
+</head>
+<body>
+	<h1>Notes structurées</h1>
+	<p><strong>Notes brutes :</strong></p>
+	<ol>
+		<li>Identité :</li>
+		<ul>
+			<li>Nom : {{ raw_text_dict.nom }}</li>
+			<li>Âge : {{ raw_text_dict.age }}</li>
+			<li>Profession : {{ raw_text_dict.profession }}</li>
+		</ul>
+
+		<li>Contexte de la consultation :</li>
+		<ul>
+			<li>Motif : {{ raw_text_dict.motif }}</li>
+		</ul>
+
+		<li>Antécédents médicaux :</li>
+		<ul>
+			<li>{{ raw_text_dict.antecedents }}</li>
+		</ul>
+
+		<li>Observations cliniques :</li>
+		<ul>
+			<li>{{ raw_text_dict.observations }}</li>
+		</ul>
+		<li>Résultats des tests :</li>
+		<ul>
+			<li>{{ raw_text_dict.tests }}</li>
+		</ul>
+		<li>Hypothèses et recommandations :</li>
+		<ul>
+			<li>Hypothèses : {{ raw_text_dict.hypotheses }}</li>
+			<li>Recommandations : {{ raw_text_dict.recommandations }}</li>
+		</ul>
+	</ol>
+
+	<p><strong>Notes structurées :</strong></p>
+	<p>{{ note.structured_text }}</p>
+
+</body>
+</html>

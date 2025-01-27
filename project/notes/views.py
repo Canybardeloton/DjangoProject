@@ -3,44 +3,86 @@ from .models import Note
 from .forms import NoteForm
 import json
 import requests
+import ollama
 
-def parse_raw_text(raw_text):
-	lines = raw_text.split('\n')
-	raw_text_dict = {}
-	for line in lines:
-		if ': ' in line:
-			key, value = line.split(': ', 1)
-			raw_text_dict[key.strip().lower()] = value.strip()
-	return raw_text_dict
+def parse_raw_text(result):
+    # Exemple de fonction pour parser le texte brut
+    return {
+        "Nom": result.get("Nom", ""),
+        "Age": result.get("Age", ""),
+        "Motif": result.get("Motif", ""),
+        "Recommandations": result.get("Recommandations", "")
+    }
 
 def generate_prompt(raw_text):
-	raw_text_dict = parse_raw_text(raw_text)
+	#raw_text_dict = parse_raw_text(raw_text)
 	return f"""
-	Rédige un compte rendu neuropsychologique complet à partir des informations suivantes :
+	Rédige un résumé complet à partir des informations suivantes :
 
-	1. Identité :
-	   - Nom : {raw_text_dict['nom']}
-	   - Âge : {raw_text_dict['age']}
-	   - Profession : {raw_text_dict['profession']}
-
-	2. Contexte de la consultation :
-	   - Motif : {raw_text_dict['motif']}
-
-	3. Antécédents médicaux :
-	   {raw_text_dict['antecedents']}
-
-	4. Observations cliniques :
-	   {raw_text_dict['observations']}
-
-	5. Résultats des tests :
-	   {raw_text_dict['tests']}
-
-	6. Hypothèses et recommandations :
-	   - Hypothèses : {raw_text_dict['hypotheses']}
-	   - Recommandations : {raw_text_dict['recommandations']}
-
-	Compte rendu :
+	+ {raw_text}
 	"""
+def output_format():
+	return {
+		"fields": [
+			"Nom",
+			"Age",
+			"Motif",
+			"Recommandations"
+		]
+	}
+
+# def	output_format():
+# 	return """
+# 	"format":{
+# 		"type":"object",
+# 		"properties":{
+# 			"Nom":{
+# 				"type":"string",
+# 			}
+# 			"Age":{
+# 				"type":"string",
+# 			}
+# 			"Profession":{
+# 				"type":"string",
+# 			}
+# 			"Motif":{
+# 				"type":"string",
+# 			}
+# 			"Antécédents médicaux":{
+# 				"type":"string",
+# 			}
+# 			"Observations cliniques":{
+# 				"type":"string",
+# 			}
+# 			"Hypothèses":{
+# 				"type":"string",
+# 			}
+# 			"Recommandations":{
+# 				"type":"string",
+# 			}
+# 		},
+# 		"required":[
+# 			"Nom",
+# 			"Age",
+# 			"Motif",
+# 			"Recommandations"
+# 		]
+# 	}"""
+
+def call_deepseekr(raw_text):
+		# Utiliser l'API d'Ollama pour générer du texte structuré
+		api_url = "http://localhost:11434/api/generate/"
+		prompt = generate_prompt(raw_text),
+		headers = {
+			"Content-Type": "application/json",
+		}
+		data = {
+			"model" : "deepseekr1:1.5b",
+			"prompt" : prompt,
+			#"format" : output_format(),
+		}
+		response = requests.post(api_url, headers=headers, json=prompt, verify=False)
+		return response.json()
 
 def upload_rawtext(request):
 	if request.method == "POST":
@@ -50,28 +92,13 @@ def upload_rawtext(request):
 			user_file = form.cleaned_data['user_file']
 			if user_file:
 				raw_text = user_file.read().decode('utf-8')
-
-			note = Note.objects.create(raw_text=raw_text)
-
-			prompt = generate_prompt(raw_text)
-
-			# Utiliser l'API d'Ollama pour générer du texte structuré
-			api_url = "https://api.ollama.com/deepseek-r1"
-			headers = {
-				"Authorization": "Bearer YOUR_API_KEY",
-				"Content-Type": "application/json"
-			}
-			prompt = generate_prompt(raw_text)
-			response = requests.post(api_url, headers=headers, json=prompt)
-			result = response.json()
-			structured_text = result['generated_text']
-
-			raw_text_dict = parse_raw_text(raw_text)
-			note.raw_text_dict = json.dumps(raw_text_dict)  # Convert to JSON string
-			note.processed = True
-			note.structured_text = structured_text
-			note.save()
-			return render(request, 'result.html', {'note': note, 'raw_text_dict': raw_text_dict})
+		note = Note.objects.create(raw_text=raw_text)
+		result = call_deepseekr(raw_text)
+		raw_text_dict = parse_raw_text(result)
+		#note.raw_text_dict = json.dumps(raw_text_dict)  # Convert to JSON string
+		note.processed = True
+		note.save()
+		return render(request, 'result.html', {'note': note, 'raw_text_dict': raw_text_dict})
 	else:
 		form = NoteForm()
 	return render(request, 'upload.html', {'form': form})

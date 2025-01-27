@@ -17,6 +17,8 @@ def FillUserForm(request):
 			if first_name and last_name and email and cabinet and password:
 				user = UserInfo.objects.create(first_name=first_name, last_name=last_name, email=email, cabinet=cabinet, password=password)
 				user.save()
+			else:
+				return HttpResponse('Please fill all the fields')
 		return redirect('home')
 	else:
 		form = UserInfoForm()
